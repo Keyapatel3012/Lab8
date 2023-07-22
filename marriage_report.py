@@ -8,6 +8,8 @@ Usage:
 """
 import os
 import sqlite3
+import csv
+import pandas as pd
 from create_relationships import db_path, script_dir
 
 def main():
@@ -26,7 +28,23 @@ def get_married_couples():
     """
     # TODO: Function body
     # Hint: See example code in lab instructions entitled "Get a List of Relationships"
+
     con = sqlite3.connect(db_path)
+    cur = con.cursor()
+# SQL query to get all relationships
+    all_relationships_query = """
+        SELECT person1.name, person2.name, start_date, type FROM relationships
+        JOIN people person1 ON person1_id = person1.id
+        JOIN people person2 ON person2_id = person2.id;
+     """
+# Execute the query and get all results
+    cur.execute(all_relationships_query)
+    all_relationships = cur.fetchall()
+    con.close()
+# Print sentences describing each relationship
+    for person1, person2, start_date, type in all_relationships:
+        print(f'{person1} has been a {type} of {person2} since {start_date}.')
+
     return
 
 def save_married_couples_csv(married_couples, csv_path):
@@ -39,6 +57,8 @@ def save_married_couples_csv(married_couples, csv_path):
     """
     # TODO: Function body
     # Hint: We did this in Lab 7.
+    df = pd.DataFrame(married_couples, columns=['Person 1', 'Person 2' 'Anniversary'])
+    df.to_csv(csv_path, index=False)
     return
 
 if __name__ == '__main__':
